@@ -1,0 +1,26 @@
+docker build -f rpa-service-docker-file -t rpa-service:1.0 .
+docker run -d -p 12022:12022 -p 10000:10000 --name rpa-service 09f7dc80ed20
+
+docker cp ./rpa-service.jar rpa-service:/
+docker restart rpa-service
+
+chmod 777 paddle/PaddleOCR/ppstructure/ai_server.py
+docker cp paddle/PaddleOCR/ppstructure/ai_server.py rpa-service:/PaddleOCR/ppstructure
+
+docker build -f ruoyi-auth-docker-file -t ruoyi-auth:1.0 .
+docker run -d -p 9200:9200 --name ruoyi-auth 09f7dc80ed20
+
+docker cp ./ruoyi-auth.jar ruoyi-auth:/
+docker restart ruoyi-auth
+
+docker build -f ruoyi-system-docker-file -t ruoyi-system:1.0 .
+docker run -d -p 9201:9201 --name ruoyi-system 945d929d4756
+
+docker cp ./ruoyi-modules-system.jar ruoyi-system:/
+docker restart ruoyi-system
+
+docker build -f ruoyi-gateway-docker-file -t ruoyi-gateway:1.0 .
+docker run -d -p 8080:8080 --name ruoyi-gateway edade7222f6e
+
+docker cp ./ruoyi-gateway.jar ruoyi-gateway:/
+docker restart ruoyi-gateway

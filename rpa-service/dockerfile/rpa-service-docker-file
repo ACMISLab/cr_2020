@@ -1,0 +1,33 @@
+FROM python:3.8
+ENV LANG zh_CN.UTF-8
+VOLUME /tmp
+workdir .
+RUN sed -i s@/deb.debian.org/@/mirrors.huaweicloud.com/@g /etc/apt/sources.list
+RUN sed -i s@/security.debian.org/@/mirrors.huaweicloud.com/@g /etc/apt/sources.list
+COPY rpa-service.jar .
+COPY google-chrome-stable_current_amd64.deb .
+COPY chromedriver /usr/local/bin
+COPY paddle .
+RUN chmod 777 PaddleOCR -R
+RUN chmod 777 paddlepaddle-2.3.2-cp38-cp38-linux_x86_64.whl
+RUN apt-get update
+RUN apt-get install locales -y
+RUN echo 'zh_CN.UTF-8 UTF-8' >> /etc/locale.gen
+RUN locale-gen
+RUN apt-get install fonts-arphic-ukai -y
+RUN pip install paddlepaddle-2.3.2-cp38-cp38-linux_x86_64.whl
+RUN pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
+RUN pip install --upgrade paddlenlp -i https://mirror.baidu.com/pypi/simple
+RUN pip install -r ./PaddleOCR/requirements.txt -i https://mirror.baidu.com/pypi/simple
+RUN chmod 777 google-chrome-stable_current_amd64.deb
+RUN chmod 777 /usr/local/bin/chromedriver
+RUN apt install ./google-chrome-stable_current_amd64.deb -y
+RUN rm -rf paddlepaddle-2.3.2-cp38-cp38-linux_x86_64.whl
+RUN rm -rf google-chrome-stable_current_amd64.deb
+ENV JAVA_HOME=/jdk1.8.0_221
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH=$JAVA_HOME/bin:$PATH
+RUN chmod 777 start_cmd.sh
+RUN chmod 777 rpa-service.jar
+RUN chmod 777 jdk1.8.0_221 -R
+ENTRYPOINT ["bash","start_cmd.sh"]
